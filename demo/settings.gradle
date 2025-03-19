@@ -1,0 +1,16 @@
+rootProject.name = 'demo'
+buildCache {
+  local {
+    enabled = false  // Disable local cache (optional)
+  }
+
+  remote(HttpBuildCache) {
+    url = 'http://localhost:5071/cache/'  // URL of your Build Cache Node
+    enabled = true                        // Enable remote cache
+    push = true                           // Allow pushing to the cache
+    allowUntrustedServer = true           // Bypass SSL validation (for HTTP/testing)
+    allowInsecureProtocol = true          // Allow HTTP (not HTTPS)
+
+  
+  }
+}
