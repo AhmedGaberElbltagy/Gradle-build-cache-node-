@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: build-cache-node
+spec:
+  selector:
+    app.kubernetes.io/part-of: gradle-enterprise
+    app.kubernetes.io/component: build-cache-node
+  ports:
+  - name: http
+    port: 5071
+  - name: grpc-bazel
+    port: 6011
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: build-cache-node
+  labels:
+    app.kubernetes.io/part-of: gradle-enterprise
+    app.kubernetes.io/component: build-cache-node
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: gradle-enterprise
+      app.kubernetes.io/component: build-cache-node
+  serviceName: build-cache-node
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: gradle-enterprise
+        app.kubernetes.io/component: build-cache-node
+    spec:
+      containers:
+      - name: build-cache-node
+        image: gradle/build-cache-node:latest
+        args: [ "start" ]
+        ports:
+        - name: http
+          containerPort: 5071
+        - name: grpc-bazel
+          containerPort: 6011
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 1.5
+        env:
+        - name: EXCLUSIVE_VOLUME_SIZE
+          value: "10Gi" # Change this to the appropriate storage size
+        volumeMounts:
+        - mountPath: /data
+          name: build-cache-node-data-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: build-cache-node-data-volume
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: '10Gi' # Change this to the appropriate storage size
+      storageClassName: 'local-path' # Change this to the appropriate storage class
