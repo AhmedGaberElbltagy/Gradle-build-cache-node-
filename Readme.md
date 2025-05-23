@@ -1,23 +1,34 @@
-The Gradle build cache is a cache mechanism that aims to save time by reusing outputs produced by other builds. The build cache works by storing (locally or remotely) build outputs and allowing builds to fetch these outputs from the cache when it is determined that inputs have not changed, avoiding the expensive work of regenerating them.
+# Gradle Build Cache
 
+This project utilizes the **Gradle Build Cache** to optimize build performance by reusing outputs from previous builds.
 
-the local cache can speed up switching branches and doing git bisect. On CI machines the local cache can act as a mirror of the remote cache, significantly reducing network usage.
+## 🚀 What is the Gradle Build Cache?
 
-to enable the build cache node in your project add this block to your setting.gradle
+The **Gradle Build Cache** is a feature that saves build outputs and reuses them in subsequent builds to avoid re-executing tasks that produce the same output. This significantly reduces build time, especially in large projects or CI environments.
+
+There are two types of build caches:
+
+- **Local Cache**: Stored on the local machine.
+- **Remote Cache**: Shared cache that multiple developers or CI machines can access.
+
+## 💡 Benefits
+
+- Faster builds by reusing outputs.
+- Improved CI efficiency.
+- Consistent build results across environments.
+
+## 🛠️ Enabling the Build Cache
+
+To enable the build cache, add the following to your `settings.gradle` or `settings.gradle.kts`:
+
+```groovy
 buildCache {
-            local {
-                enabled = false
-            }
-            remote(HttpBuildCache) {
-                url = "${{ cacheUrl }}"
-                enabled = true
-                push = true
-                allowUntrustedServer = true
-                allowInsecureProtocol = true
-                System.setProperty("http.nonProxyHosts",
-                    "${System.getProperty("http.nonProxyHosts")}|${{ parameters.nonProxyHost }}")
-            }
-        }
-
-the command to be used to utilize the build cacge node during the build is 
-./gradlew build --build-cache .
+    local {
+        enabled = true
+    }
+    remote(HttpBuildCache) {
+        url = 'https://your-cache-server/cache/'
+        push = true
+    }
+}
+Ensure you replace 'https://your-cache-server/cache/' with your actual cache server URL.
